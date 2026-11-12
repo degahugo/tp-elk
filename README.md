@@ -105,21 +105,540 @@ Documentation utile : https://docs.opensearch.org/latest/.
 
 ### INDEX et UPDATE API
 - (Question) Après avoir étudié la structure d’un document, ajouter un nouveau compte dont l’ID est 10001
+
+Requete : PUT bank/_doc/10001
+{
+"account_number": 10001,
+"balance": 10,
+"firstname":"Jean",
+"lastname":"Deux",
+"age":20,
+"gender":"M",
+"address":"Space",
+"email":"mail@mail.mail",
+"city":"Mycity",
+"state":"Mystate"
+  
+}
+
+Résultat : 
+
+{
+  "_index": "bank",
+  "_id": "10001",
+  "_version": 1,
+  "result": "created",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 1000,
+  "_primary_term": 1
+}
+
 - (Question) Mettre à jour le compte précédent en modifiant l’adresse
+
+Requete :
+
+POST bank/_update/10001
+{
+  "doc": { "address": "12 rue de la Paix" }
+}
+
+Résultat : 
+
+{
+  "_index": "bank",
+  "_id": "10001",
+  "_version": 2,
+  "result": "updated",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 1001,
+  "_primary_term": 1
+}
 
 ### DELETE API
 - (Question) Supprimer le compte précédemment créé
+
+Requete :
+
+DELETE bank/_doc/10001
+
+Résultat : 
+
+{
+  "_index": "bank",
+  "_id": "10001",
+  "_version": 3,
+  "result": "deleted",
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 1002,
+  "_primary_term": 1
+}
+
 - (Question) Supprimer tous les comptes de la ville de Nicholson (Utiliser _delete_by_query)
+
+Requete : 
+
+POST bank/_delete_by_query
+{
+  "query": {
+    "term": { "city.keyword": "Nicholson" }
+  }
+}
+
+Resultat : 
+
+{
+  "took": 94,
+  "timed_out": false,
+  "total": 1,
+  "deleted": 1,
+  "batches": 1,
+  "version_conflicts": 0,
+  "noops": 0,
+  "retries": {
+    "bulk": 0,
+    "search": 0
+  },
+  "throttled_millis": 0,
+  "requests_per_second": -1,
+  "throttled_until_millis": 0,
+  "failures": []
+}
+
+
 
 ### GET API
 - (Question) Obtenir le compte dont l’ID est 2
+
+Requete : 
+
+GET bank/_doc/2
+
+
+Résultat : 
+
+{
+  "_index": "bank",
+  "_id": "2",
+  "_version": 1,
+  "_seq_no": 200,
+  "_primary_term": 1,
+  "found": true,
+  "_source": {
+    "account_number": 2,
+    "balance": 28838,
+    "firstname": "Roberta",
+    "lastname": "Bender",
+    "age": 22,
+    "gender": "F",
+    "address": "560 Kingsway Place",
+    "employer": "Chillium",
+    "email": "robertabender@chillium.com",
+    "city": "Bennett",
+    "state": "LA"
+  }
+}
+
 - (Question) Idem mais récupérer uniquement le source (champs _source)
+
+Requete :
+
+GET bank/_source/2
+
+Resultat :
+
+
+{
+  "account_number": 2,
+  "balance": 28838,
+  "firstname": "Roberta",
+  "lastname": "Bender",
+  "age": 22,
+  "gender": "F",
+  "address": "560 Kingsway Place",
+  "employer": "Chillium",
+  "email": "robertabender@chillium.com",
+  "city": "Bennett",
+  "state": "LA"
+}
+
+
 - (Question) Idem mais en ne sélectionnant que le nom et le prénom (firstname, lastname)
+
+Requete : 
+
+GET bank/_doc/2?_source=firstname,lastname
+
+Resultat :
+
+{
+  "_index": "bank",
+  "_id": "2",
+  "_version": 1,
+  "_seq_no": 200,
+  "_primary_term": 1,
+  "found": true,
+  "_source": {
+    "firstname": "Roberta",
+    "lastname": "Bender"
+  }
+}
+
 
 ### SEARCH API
 - (Question) Retrouver tous les comptes
+
+Requete : 
+
+GET bank/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+Resultat : 
+
+{
+  "took": 10,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 999,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "bank",
+        "_id": "1",
+        "_score": 1,
+        "_source": {
+          "account_number": 1,
+          "balance": 39225,
+          "firstname": "Amber",
+          "lastname": "Duke",
+          "age": 32,
+          "gender": "M",
+          "address": "880 Holmes Lane",
+          "employer": "Pyrami",
+          "email": "amberduke@pyrami.com",
+          "city": "Brogan",
+          "state": "IL"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "6",
+        "_score": 1,
+        "_source": {
+          "account_number": 6,
+          "balance": 5686,
+          "firstname": "Hattie",
+          "lastname": "Bond",
+          "age": 36,
+          "gender": "M",
+          "address": "671 Bristol Street",
+          "employer": "Netagy",
+          "email": "hattiebond@netagy.com",
+          "city": "Dante",
+          "state": "TN"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "13",
+        "_score": 1,
+        "_source": {
+          "account_number": 13,
+          "balance": 32838,
+          "firstname": "Nanette",
+          "lastname": "Bates",
+          "age": 28,
+          "gender": "F",
+          "address": "789 Madison Street",
+          "employer": "Quility",
+          "email": "nanettebates@quility.com",
+          "city": "Nogal",
+          "state": "VA"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "18",
+        "_score": 1,
+        "_source": {
+          "account_number": 18,
+          "balance": 4180,
+          "firstname": "Dale",
+          "lastname": "Adams",
+          "age": 33,
+          "gender": "M",
+          "address": "467 Hutchinson Court",
+          "employer": "Boink",
+          "email": "daleadams@boink.com",
+          "city": "Orick",
+          "state": "MD"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "20",
+        "_score": 1,
+        "_source": {
+          "account_number": 20,
+          "balance": 16418,
+          "firstname": "Elinor",
+          "lastname": "Ratliff",
+          "age": 36,
+          "gender": "M",
+          "address": "282 Kings Place",
+          "employer": "Scentric",
+          "email": "elinorratliff@scentric.com",
+          "city": "Ribera",
+          "state": "WA"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "32",
+        "_score": 1,
+        "_source": {
+          "account_number": 32,
+          "balance": 48086,
+          "firstname": "Dillard",
+          "lastname": "Mcpherson",
+          "age": 34,
+          "gender": "F",
+          "address": "702 Quentin Street",
+          "employer": "Quailcom",
+          "email": "dillardmcpherson@quailcom.com",
+          "city": "Veguita",
+          "state": "IN"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "37",
+        "_score": 1,
+        "_source": {
+          "account_number": 37,
+          "balance": 18612,
+          "firstname": "Mcgee",
+          "lastname": "Mooney",
+          "age": 39,
+          "gender": "M",
+          "address": "826 Fillmore Place",
+          "employer": "Reversus",
+          "email": "mcgeemooney@reversus.com",
+          "city": "Tooleville",
+          "state": "OK"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "44",
+        "_score": 1,
+        "_source": {
+          "account_number": 44,
+          "balance": 34487,
+          "firstname": "Aurelia",
+          "lastname": "Harding",
+          "age": 37,
+          "gender": "M",
+          "address": "502 Baycliff Terrace",
+          "employer": "Orbalix",
+          "email": "aureliaharding@orbalix.com",
+          "city": "Yardville",
+          "state": "DE"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "49",
+        "_score": 1,
+        "_source": {
+          "account_number": 49,
+          "balance": 29104,
+          "firstname": "Fulton",
+          "lastname": "Holt",
+          "age": 23,
+          "gender": "F",
+          "address": "451 Humboldt Street",
+          "employer": "Anocha",
+          "email": "fultonholt@anocha.com",
+          "city": "Sunriver",
+          "state": "RI"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "51",
+        "_score": 1,
+        "_source": {
+          "account_number": 51,
+          "balance": 14097,
+          "firstname": "Burton",
+          "lastname": "Meyers",
+          "age": 31,
+          "gender": "F",
+          "address": "334 River Street",
+          "employer": "Bezal",
+          "email": "burtonmeyers@bezal.com",
+          "city": "Jacksonburg",
+          "state": "MO"
+        }
+      }
+    ]
+  }
+}
+
+
 - (Question) Retrouver tous les comptes dont la ville (champs city) est Belvoir
+
+Requete : 
+
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "city":"Belvoir"
+    }
+  }
+}
+
+Resultat : 
+
+{
+  "took": 10,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": 2.7249608,
+    "hits": [
+      {
+        "_index": "bank",
+        "_id": "108",
+        "_score": 2.7249608,
+        "_source": {
+          "account_number": 108,
+          "balance": 19015,
+          "firstname": "Christensen",
+          "lastname": "Weaver",
+          "age": 21,
+          "gender": "M",
+          "address": "398 Dearborn Court",
+          "employer": "Quilk",
+          "email": "christensenweaver@quilk.com",
+          "city": "Belvoir",
+          "state": "TX"
+        }
+      },
+      {
+        "_index": "bank",
+        "_id": "999",
+        "_score": 2.7249608,
+        "_source": {
+          "account_number": 999,
+          "balance": 6087,
+          "firstname": "Dorothy",
+          "lastname": "Barron",
+          "age": 22,
+          "gender": "F",
+          "address": "499 Laurel Avenue",
+          "employer": "Xurban",
+          "email": "dorothybarron@xurban.com",
+          "city": "Belvoir",
+          "state": "CA"
+        }
+      }
+    ]
+  }
+}
+
+
 - (Question) Retrouver tous les comptes dont la ville (champs city) est Belvoir ET l’employeur Xurban
+
+Requete : 
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "city": "Belvoir" } },
+        { "match": { "employer": "Xurban" } }
+      ]
+    }
+  }
+}
+
+Resultat :
+
+{
+  "took": 41,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 5.4499216,
+    "hits": [
+      {
+        "_index": "bank",
+        "_id": "999",
+        "_score": 5.4499216,
+        "_source": {
+          "account_number": 999,
+          "balance": 6087,
+          "firstname": "Dorothy",
+          "lastname": "Barron",
+          "age": 22,
+          "gender": "F",
+          "address": "499 Laurel Avenue",
+          "employer": "Xurban",
+          "email": "dorothybarron@xurban.com",
+          "city": "Belvoir",
+          "state": "CA"
+        }
+      }
+    ]
+  }
+}
+
 
 ## Visualisation des données avec OpenSearch Dashboards
 Avant de créer des visuels, déclarez l'index à OpenSearch Dashboards : menu `Dashboards Management` › `Index patterns` › `Create index pattern`, saisissez `bank`, puis validez.
@@ -127,12 +646,47 @@ Avant de créer des visuels, déclarez l'index à OpenSearch Dashboards : menu `
 Aller ensuite sur l’onglet Visualize et créer les visuels suivants :
 
 - (Question) Métrique affichant la somme des soldes de tous les comptes. Sauver le graphique.
+
+Réponse : 
+
+Question : métrique affichant la somme des soldes
+
+Étapes réalisées :
+
+Menu Visualize → Create visualization → type Metric → source bank.  
+Dans Metrics, l’agrégation par défaut Count a été remplacée par Sum, sur le champ balance.  
+ 
+
+la somme des soldes des 999 comptes est de 25 674 297
+
 - (Question) Graphique barre affichant la moyenne des soldes (champ balance) selon l’état (champ state). Sauver le graphique.
+
+Réponse : 
+
+Étapes réalisées :  
+
+Menu Visualize → Create visualization → type Vertical Bar → source bank.  
+Axe Y (Metrics) : agrégation Average sur le champ balance.  
+Axe X (Buckets → Add → X-axis) :    
+agrégation Terms sur le champ state. keyword, triée par la moyenne des soldes en ordre  décroissant, avec Size = 51 pour afficher tous les états.  
+
+
 - (Question) Nuage de mots représentant les villes dans lesquelles il y a le plus de comptes. Sauver le graphique.
+
+Étapes réalisées :  
+
+Menu Visualize → Create visualization → type Tag Cloud → source bank.  
+Métrique : Count, la taille de chaque mot représentant le nombre de comptes.  
+Bucket (Tags) : agrégation Terms sur le champ city.keyword, triée par nombre de comptes en ordre décroissant, avec Size = 30.  
 
 Rendez-vous ensuite sur l’onglet Dashboard puis : 
 
 - (Question) Réaliser un tableau de bord regroupant les 3 visuels précédents.
+
+
+
+
+
 - (Question) Exécuter une requête dans la barre de recherche situé au dessus et remarquez que les visuels se mettent automatiquement à jour.
 
 # Partie 2 - Gestion de documents textuels
